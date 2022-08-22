@@ -1,4 +1,4 @@
-# Invenory
+# inventory
 * The playbook performs an inventory of hosts, uploading information to a file: /var/tmp/host.info
 ```
 The template looks like:
