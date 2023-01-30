@@ -9,11 +9,11 @@ IPv6:
 {% for ip6 in ansible_facts.all_ipv6_addresses %}
 {{ ip6 }}
 {% endfor %}
-SYSTEMCTL: 
+SERVICES: 
 {% for service in ansible_facts.services %}
-name: {{ ansible_facts.services[service]['name'] }} status: {{ ansible_facts.services[service]['status'] }}
+name: {{ ansible_facts.services[service]['name'] }} state: {{ ansible_facts.services[service]['state'] }}
 {% endfor %}
-CPU: {{ ansible_facts.processor[2] }}
+CPU: {{ ansible_facts.processor[2] }} {{ansible_facts.product_name}}
 cores: {{ ansible_facts.processor_cores}} 
 threads per core: {{ ansible_facts.processor_threads_per_core }}
 RAM: 

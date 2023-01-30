@@ -3,6 +3,10 @@
   hosts: localhost
   become: true
   tasks: 
+    - name: Install prerequests
+      package:
+        name: net-tools
+        state: present
     - name: "Get usr list"
       getent:
         database: passwd
@@ -10,6 +14,9 @@
       listen_ports_facts:
     - name: "System services"
       service_facts:
+    - name: debug
+      debug:
+        var: ansible_facts
     - name: "Get cron jobs"
       shell:  | 
         echo "tasks in /etc/crontab:"
@@ -19,7 +26,7 @@
         echo "users tasks:"
         for user in $(getent passwd | cut -f1 -d: )
             do
-              if crontab -u $user -l &>/dev/null
+              if crontab -u $user -l 2>/dev/null
               then echo $user:
               crontab -u $user -l 2>/dev/null | grep -v '^#'
               fi
@@ -34,3 +41,4 @@
         owner: root
         group: root
         mode: 0660
+      ignore_errors: true
