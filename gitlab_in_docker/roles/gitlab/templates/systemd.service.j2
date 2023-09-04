@@ -1,0 +1,14 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description={{ service_name}}
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c "docker-compose -f {{ compose_host_dir }}/docker-compose.yml up -d" 
+ExecStop=/bin/bash -c "docker-compose -f {{ compose_host_dir }}/docker-compose.yml stop"
+
+[Install]
+WantedBy=multi-user.target

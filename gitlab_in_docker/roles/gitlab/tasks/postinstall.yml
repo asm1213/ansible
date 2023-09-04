@@ -1,0 +1,17 @@
+---
+- name: Copy systemd unit for docker-compose
+  ansible.builtin.template:
+    src: systemd.service.j2
+    dest: /etc/systemd/system/{{ service_name }}-docker.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload systemd unit
+
+- name: Ensure gitlab service is run
+  ansible.builtin.systemd:
+    state: started
+    daemon_reload: true
+    enabled: true
+    name: "{{ service_name }}-docker.service"

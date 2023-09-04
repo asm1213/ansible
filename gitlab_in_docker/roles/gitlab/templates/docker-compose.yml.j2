@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+version: '3.3'
+
+networks:
+  {{ service_name}}-network:
+
+services:
+  {{ service_name }}:
+    container_name: {{ service_name }}
+    hostname: {{ hostname }}
+    image: "{{ service_image }}:{{ service_image_tag }}"
+    restart: unless-stopped
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+      {% for value in gitlab_config %}
+      {{ value }}
+      {% endfor %}
+    #  
+    ports:
+    {% for port in service_ports %}
+  - {{ port }}
+    {% endfor -%}
+    volumes:
+    {% for volume in exporter_volumes %}
+  - {{ volume }}
+    {% endfor -%}
+    shm_size: '256m'
+    networks:
+      - {{ service_name}}-network

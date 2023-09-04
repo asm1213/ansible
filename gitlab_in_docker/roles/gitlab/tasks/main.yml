@@ -1,0 +1,11 @@
+---
+- name: prepare (install docker from binares)
+  ansible.builtin.include_tasks:
+    file: prepare.yml
+  when: docker_install
+- name: Install gitlab
+  ansible.builtin.include_tasks:
+    file: install.yml
+- name: add gitlab service
+  ansible.builtin.include_tasks:
+    file: postinstall.yml

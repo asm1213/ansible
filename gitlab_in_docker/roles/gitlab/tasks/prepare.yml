@@ -1,0 +1,91 @@
+---
+- name: Check docker path
+  ansible.builtin.command: which docker
+  register: docker_path
+  no_log: true
+  ignore_errors: true
+
+- name: Echo about docker
+  ansible.builtin.debug:
+    msg: "Docker is not installed"
+  when: docker_path.rc != 0
+  
+- name: Download docker bin
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/static/stable/x86_64/docker-{{ docker_version}}.tgz"
+    dest: "/tmp/docker-{{ docker_version}}.tgz"
+  register: download_result
+  when: docker_path.rc != 0
+
+- name: unarchive
+  ansible.builtin.unarchive:
+    src: "/tmp/docker-{{ docker_version}}.tgz"
+    dest: /tmp/
+    remote_src: yes
+    # extra_opts: "--strip-components=1"
+    owner: root
+    group: root
+    mode: 0755
+  when: download_result is succeeded and docker_path.rc != 0
+
+- name: Copy docker bin
+  ansible.builtin.copy:
+    src: /tmp/docker/
+    dest: /usr/bin/
+    remote_src: true
+  when: download_result is succeeded and docker_path.rc != 0
+
+- name: remove docker tar
+  ansible.builtin.file:
+    path: "/tmp/docker-{{ docker_version}}.tgz"
+    state: absent
+  ignore_errors: true
+  when: download_result is succeeded
+
+- name: remove docker tmp dir
+  ansible.builtin.file:
+    path: "/tmp/docker"
+    state: absent
+  ignore_errors: true
+  when: download_result is succeeded
+  
+- name: Check docker compose
+  ansible.builtin.command: which docker-compose
+  register: dockerc_path
+  ignore_errors: true
+
+- name: Echo about docker
+  ansible.builtin.debug:
+    msg: "Docker compose is not installed"
+  when: dockerc_path.rc != 0
+
+- name: Install docker-compose bin
+  ansible.builtin.get_url:
+      url: https://github.com/docker/compose/releases/download/v{{ compose_version }}/docker-compose-linux-x86_64
+      dest: /usr/bin/docker-compose
+      mode: 0755
+      owner: root
+      group: root
+  when: dockerc_path.rc != 0
+
+- name: Create the docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+    system: true
+
+- name: add systemd unit for docker
+  ansible.builtin.copy:
+    src: files/
+    dest: /etc/systemd/system/
+
+- name: Enable and run docker
+  ansible.builtin.systemd:
+    state: started
+    daemon_reload: true
+    enabled: true
+    name: "{{ item }}"
+  loop:
+    - docker.service
+    - docker.socket
+    - containerd.service

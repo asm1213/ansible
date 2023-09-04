@@ -1,0 +1,16 @@
+---
+# handlers file
+- name: restart docker-compose
+  become: true
+  ansible.builtin.shell: |
+    docker-compose down -v
+    docker-compose up -d
+  args:
+    chdir: "{{ compose_host_dir }}"
+
+- name: reload systemd unit
+  ansible.builtin.systemd:
+    state: started
+    daemon_reload: true
+    enabled: true
+    name: "{{ service_name }}-docker.service"

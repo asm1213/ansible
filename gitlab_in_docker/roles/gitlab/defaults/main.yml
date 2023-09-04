@@ -1,0 +1,30 @@
+---
+# defaults file for docker gitlab
+# versions to install
+docker_version: 24.0.4
+compose_version: 2.20.0
+docker_install: false
+
+service_name: gitlab
+compose_host_dir: /opt/{{ service_name }}
+hostname: example.com
+service_ports: 
+- '"4443:443"'
+- '"8081:80"'
+- '"2280:22"'
+exporter_volumes: 
+- "./config:/etc/gitlab"
+- "./logs:/var/log/gitlab"
+- "./data:/var/opt/gitlab"
+service_image: gitlab/gitlab-ce
+service_image_tag: "16.3.1-ce.0"
+
+gitlab_config:
+  - external_url 'https://example.com/'
+  - gitlab_rails['gitlab_shell_ssh_port'] = 2289
+  - letsencrypt['auto_renew_hour'] = "12"
+  - letsencrypt['auto_renew_minute'] = "30"
+  - letsencrypt['auto_renew_day_of_month'] = "*/7"
+  - letsencrypt['enable'] = true
+  - letsencrypt['contact_emails'] = ['asmodian.art@gmail.com']
+  - letsencrypt['auto_renew'] = true
